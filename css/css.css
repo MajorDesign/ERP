@@ -1,0 +1,250 @@
+/* Barra no topo */
+.navbar.nav-mod {
+    padding: 0;
+    background: linear-gradient(90deg, #006df0 0%, #53279a 80%) !important;
+    background-image: linear-gradient(90deg, rgb(64 64 64) 0%, rgb(36 36 36) 80%) !important;
+    height: 50px;
+}
+
+.sidebar {
+    transition: width 0.3s; /* Smooth transition for width change */
+  }
+  
+  .sidebar.closed {
+    width: 66px; /* Width when closed */
+    background-color: #fff;
+  }
+  
+  .sidebar.open {
+    width: 250px; /* Width when open */
+  }
+  
+  .sidebar.closed .logo-container {
+    height: 50px; /* Adjust the height as needed */
+    background-image: url('../imagens/logo.png');
+    background-repeat:no-repeat;
+    background-position: left;
+    overflow: hidden;
+    background-color: #e1a325;
+  }
+  
+  .sidebar.open .logo-container {
+    height: 100px; /* Adjust the height as needed */
+    background-image: url('../imagens/logo.png');
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .sidebar.closed .logo {
+    display: none; /* Hide the img element */
+  }
+  
+  .sidebar.open .logo {
+    display: none; /* Hide the img element */
+  }
+  
+
+
+/*Estilização dos botões no menu cadastrar produto*/
+button.btn.btn-primary.btn-modific {
+    background: #fff;
+    border: 1px solid #c4ced9;
+    border-radius: 4px;
+    box-sizing: border-box;
+    color: #037f31;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+    margin: 0;
+    outline: 0;
+    padding: 13px 30px;
+    text-align: center;
+    transition: .1s;
+    white-space: nowrap;
+    font-family: bevi, sans-serif;
+}
+
+/*Botao editar*/
+.btn.disabled, .btn:disabled, fieldset:disabled .btn {
+    color: #a3a3a3!important;
+    pointer-events: none;
+    background-color: #EDEDED !important;
+    border-color: #c6c6c6 !important;
+    opacity: var(--bs-btn-disabled-opacity);
+}
+
+button#editarProdutoBtn {
+    background: #fff;
+    border: 1px solid #c4ced9;
+    border-radius: 4px;
+    box-sizing: border-box;
+    color: #a3a3a3;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+    margin: 0;
+    outline: 0;
+    padding: 13px 30px;
+    text-align: center;
+    transition: .1s;
+    white-space: nowrap;
+    font-family: bevi, sans-serif;
+}
+
+/* Estilo para o botão habilitado */
+button#editarProdutoBtn.enabled {
+    background-color: #e1a325;
+    color: #ffffff;
+    border-color: #a5791b;
+    box-shadow: 1px 0px 4px #8f6100;
+}
+img.img-icon {
+    width: 21px;
+}
+i.fa-solid.fa-file-pen.icone-plus-modific {
+   
+}
+
+i.fa-solid.fa-file-pen{
+    color: #6d6044;
+}
+
+i.fa-solid.fa-square-plus.icone-plus-modific {
+    font-size: 19px;
+}
+
+/*Estilização do botão de cadastrar produto*/
+span.badge.badge-secondary.span-modific {
+    color: #428d36;
+    font-size: 15px;
+    font-family: Droid Sans, sans-serif, tahoma, "Trebuchet MS";
+}
+
+/* Estilização da barra lateral */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 100%;
+    background: #0669ea;
+    transition: 0.3s;
+    overflow: hidden;
+    z-index: 2;
+}
+
+/*Estilização da barra interna aonde fica os botões*/
+nav.navbar.navbar-dark.bg-dark.nav-mod-interna {
+    z-index: 0;
+    background-color: #F1F1F1!important;
+    border-bottom: 1px solid #DDD; 
+}
+
+button.btn.btn-primary.btn-sm.botao-mod-interno {
+    border-radius: 0;
+}
+
+/* Expandir ao passar o mouse */
+.sidebar:hover {
+    width: 250px;
+}
+
+/* Lista do menu */
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+/* Itens do menu */
+.sidebar ul li {
+    padding: 15px;
+}
+
+/* Links do menu */
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #000;
+    font-size: 18px;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+/* Ícones sempre visíveis */
+.sidebar ul li a i {
+    width: 49px;
+    font-size: 22px;
+    text-align: center;
+    color: #3f3f3f;
+}
+
+/* Texto escondido inicialmente */
+.text {
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 0.3s ease-in-out, margin-left 0.3s ease-in-out;
+    margin-left: 0px;
+}
+
+/* Quando passar o mouse, mostrar o texto */
+.sidebar:hover .text {
+    opacity: 1;
+    margin-left: 10px;
+}
+
+/* Estilização do container */
+.product {
+    text-align: center;
+    margin-top: 50px;
+}
+
+/* Estilização do botão */
+button {
+    font-size: 18px;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 5px;
+}
+
+/* Botão ativo (verde) */
+button.active {
+    background: green;
+    color: white;
+}
+
+/* Botão inativo (vermelho) */
+button.inactive {
+    background: red;
+    color: white;
+}
+
+.botao {
+    background-color: blue;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.editar {
+    background-color: orange;
+    color: white;
+    padding: 5px 10px;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.selected {
+    background-color: yellow!important;
+}
+
+.table tbody tr.highlight td {
+    background-color: yellow;
+}
