@@ -1,73 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
     <?php
     include "../include/head.html";
-    require_once '../conexao.php';
+
+    $servidor = "localhost";
+    $usuario = "root";
+    $senha = "";
+    $dbname = "banco_projeto";
+
+    try {
+        $conn = new mysqli($servidor, $usuario, $senha, $dbname);
+
+        if ($conn->connect_error) {
+            throw new Exception("Falha na conexão: " . $conn->connect_error);
+        }
+
+        $conn->set_charset("utf8");
+    } catch (Exception $e) {
+        error_log("Erro de conexão: " . $e->getMessage());
+        die("Erro ao conectar com o banco de dados");
+    }
     ?>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
     <nav class="navbar navbar-dark bg-dark nav-mod-interna">
         <div class="container">
             <div class="row">
                 <div class="col-md">
                     <div class="d-flex gap-2 mb-3">
                         <button type="button" class="btn btn-primary btn-modific d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                            <img class="img-icon" src="..\imagens\icone\adicao.png" alt="">
+                            <img class="img-icon" src="../imagens/icone/adicao.png" alt="">
                             <span class="ms-2">Novo</span>
                         </button>
-                        <!-- Botão Editar Produto começa aqui -->
                         <button type="button" class="btn btn-warning btn-sm disabled" id="editarProdutoBtn" disabled>
                             <i class="fa-solid fa-file-pen"></i>
                             <span class="ms-2">Editar</span>
                         </button>
-                        <!-- Botão Editar Produto termina aqui -->
                         <button type="button" id="deleteProductBtn" class="btn btn-danger disabled" disabled>Excluir Produto</button>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-</head>
-
-<body>
 
     <!-- Modal Novo Produto -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content container-sm">
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Novo Produto</h5>
-                    <nav class="navbar navbar-dark bg-dark nav-mod-interna">Cadastro de Produto</nav>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <!-- Formulário dentro do modal -->
-                <form id="produtoForm" action="../salvar.php" method="POST">
+                <form id="novoProdutoForm" method="POST" novalidate>
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-sm-8">
                                 <div class="card text-black">
-                                    <div class="container">
+                                    <div class="card-body">
                                         <h2>INFORMAÇÕES</h2>
 
-                                        <label>Nome do Produto:</label>
-                                        <input type="text" name="nome" required class="form-control"><br>
+                                        <div class="mb-3">
+                                            <label for="nome" class="form-label">Nome do Produto:</label>
+                                            <input type="text" name="nome" id="nome" required class="form-control">
+                                        </div>
 
-                                        <label>Quantidade:</label>
-                                        <input type="number" name="quantidade" required class="form-control"><br>
+                                        <div class="mb-3">
+                                            <label for="descricao" class="form-label">Descrição:</label>
+                                            <textarea name="descricao" id="descricao" required class="form-control"></textarea>
+                                        </div>
 
-                                        <label>Preço do Produto:</label>
-                                        <input type="text" name="valor" required class="form-control"><br>
+                                        <div class="mb-3">
+                                            <label for="quantidade" class="form-label">Quantidade:</label>
+                                            <input type="number" name="quantidade" id="quantidade" required class="form-control">
+                                        </div>
 
-                                        <?php include "../include/categoria_field.php"; ?>
+                                        <div class="mb-3">
+                                            <label for="valor" class="form-label">Preço do Produto:</label>
+                                            <input type="number" name="valor" id="valor" required class="form-control" step="0.01">
+                                        </div>
+
+                                        <!-- Modal Categoria -->
+                                        <div class="modal fade" id="categoriaModal" tabindex="-1" aria-labelledby="categoriaModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="categoriaModalLabel">Cadastrar Nova Categoria</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <iframe src="../pages/categorias.php" frameborder="0" width="100%" height="500px" style="border: none; overflow: hidden;"></iframe>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Seção de Categorias -->
+                                        <div class="mb-3">
+                                            <label class="form-label">Categoria do Produto:</label>
+                                            <div class="categorias-container">
+                                                <?php
+                                                try {
+                                                    require_once '../conexao.php';
+
+                                                    if ($conn->connect_error) {
+                                                        throw new Exception("Falha na conexão com o banco de dados");
+                                                    }
+
+                                                    $sql = "SELECT id, nome FROM categorias WHERE status = 1 ORDER BY nome";
+                                                    $result = $conn->query($sql);
+
+                                                    if ($result && $result->num_rows > 0) {
+                                                        echo '<select name="categoria_id" class="form-control mb-2" required>';
+                                                        echo '<option value="">Selecione uma categoria</option>';
+                                                        while ($row = $result->fetch_assoc()) {
+                                                            echo '<option value="' . $row['id'] . '">' . htmlspecialchars($row['nome']) . '</option>';
+                                                        }
+                                                        echo '</select>';
+                                                    } else {
+                                                        echo '<div class="alert alert-warning">Nenhuma categoria encontrada.</div>';
+                                                    }
+                                                } catch (Exception $e) {
+                                                    error_log("Erro ao carregar categorias: " . $e->getMessage());
+                                                    echo '<div class="alert alert-danger">Erro ao carregar categorias. Por favor, tente novamente.</div>';
+                                                }
+                                                ?>
+                                            </div>
+                                            <button type="button" class="btn btn-success mt-2" id="btnNovaCategoria">
+                                                <i class="fas fa-plus"></i> Nova Categoria
+                                            </button>
+                                        </div>
+                                        <!-- Fim da Seção de Categorias -->
+
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Footer do modal -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                        <button type="submit" class="btn btn-primary">Salvar Produto</button>
+                        <button type="submit" class="btn btn-primary" id="btnSalvarProduto">Salvar Produto</button>
                     </div>
                 </form>
             </div>
@@ -75,41 +152,40 @@
     </div>
 
     <!-- Modal Editar Produto -->
-    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content container-sm">
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Editar Produto</h5>
-                    <nav class="navbar navbar-dark bg-dark nav-mod-interna">Editar Produto</nav>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <!-- Formulário dentro do modal -->
                 <form id="editProdutoForm" action="../atualizar.php" method="POST">
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-sm-8">
-                                <div class="card text-black">
-                                    <div class="container">
-                                        <h2>INFORMAÇÕES</h2>
-
+                                <div class="card">
+                                    <div class="card-body">
                                         <input type="hidden" name="id" id="editProdutoId">
 
-                                        <label>Nome do Produto:</label>
-                                        <input type="text" name="nome" id="editProdutoNome" required class="form-control"><br>
+                                        <div class="mb-3">
+                                            <label for="editProdutoNome" class="form-label">Nome do Produto:</label>
+                                            <input type="text" name="nome" id="editProdutoNome" required class="form-control">
+                                        </div>
 
-                                        <label>Descrição:</label>
-                                        <textarea name="descricao" id="editProdutoDescricao" required class="form-control"></textarea><br>
+                                        <div class="mb-3">
+                                            <label for="editProdutoDescricao" class="form-label">Descrição:</label>
+                                            <textarea name="descricao" id="editProdutoDescricao" required class="form-control"></textarea>
+                                        </div>
 
-                                        <label>Preço do Produto:</label>
-                                        <input type="number" name="valor" id="editProdutoValor" required class="form-control" step="0.01"><br>
-
-                                        <?php include "../include/categoria_field.php"; ?>
+                                        <div class="mb-3">
+                                            <label for="editProdutoValor" class="form-label">Preço do Produto:</label>
+                                            <input type="number" name="valor" id="editProdutoValor" required class="form-control" step="0.01">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Footer do modal -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                         <button type="submit" class="btn btn-primary">Salvar Alterações</button>
@@ -121,19 +197,77 @@
         </div>
     </div>
 
-    <!-- Script para corrigir backdrop do modal -->
+    <!-- Scripts -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            const novoProdutoForm = document.getElementById('novoProdutoForm');
+            const btnSalvar = document.getElementById('btnSalvarProduto');
+
+            if (novoProdutoForm && btnSalvar) {
+                novoProdutoForm.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(this);
+
+                    const camposObrigatorios = ['nome', 'descricao', 'quantidade', 'valor', 'categoria_id'];
+                    const camposVazios = [];
+
+                    camposObrigatorios.forEach(campo => {
+                        const valor = formData.get(campo);
+                        if (!valor || valor.trim() === '') {
+                            camposVazios.push(campo);
+                        }
+                    });
+
+                    if (camposVazios.length > 0) {
+                        alert(`Por favor, preencha todos os campos obrigatórios: ${camposVazios.join(', ')}`);
+                        return;
+                    }
+
+                    btnSalvar.disabled = true;
+                    btnSalvar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Salvando...';
+
+                    try {
+                        const response = await fetch('../salvar.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const responseText = await response.text();
+                        let data;
+                        try {
+                            data = JSON.parse(responseText);
+                        } catch (e) {
+                            throw new Error(`Resposta inválida do servidor: ${responseText}`);
+                        }
+
+                        if (data.success) {
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+                            modal.hide();
+                            alert('Produto cadastrado com sucesso!');
+                            location.reload();
+                        } else {
+                            throw new Error(data.message || 'Erro ao cadastrar produto');
+                        }
+                    } catch (error) {
+                        console.error('Erro:', error);
+                        alert('Erro ao salvar produto: ' + error.message);
+                    } finally {
+                        btnSalvar.disabled = false;
+                        btnSalvar.innerHTML = 'Salvar Produto';
+                    }
+                });
+            }
+
             const modals = document.querySelectorAll('.modal');
             modals.forEach(modal => {
                 modal.addEventListener('hidden.bs.modal', function() {
                     document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
                     document.body.classList.remove('modal-open');
-                    document.body.style.overflow = "auto"; // Permite rolagem da página
+                    document.body.style.overflow = "auto";
                 });
             });
 
-            // Adiciona evento de clique ao botão Editar
             document.getElementById('editarProdutoBtn').addEventListener('click', function() {
                 if (this.classList.contains('disabled')) {
                     return;
@@ -219,7 +353,6 @@
                 }
             });
 
-            // Adiciona evento de clique aos produtos para abrir o modal de edição
             document.querySelectorAll('.product-row').forEach(item => {
                 item.addEventListener('click', function() {
                     document.querySelectorAll('.product-row').forEach(r => r.classList.remove('selected'));
@@ -243,6 +376,12 @@
                     abrirModalEditar(id, nome, descricao, valor);
                 });
             });
+
+            // Adicionando evento para abrir o modal de categoria
+            document.getElementById('btnNovaCategoria').addEventListener('click', function() {
+                const categoriaModal = new bootstrap.Modal(document.getElementById('categoriaModal'));
+                categoriaModal.show();
+            });
         });
 
         function abrirModalEditar(id, nome, descricao, valor) {
@@ -255,67 +394,10 @@
         }
     </script>
 
-    <!-- Pop-up modal -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="fecharModal()">&times;</span>
-            <h2>Lista de Produtos</h2>
-
-            <!-- Aqui será carregada a tabela de produtos via AJAX -->
-            <div id="conteudo-modal"></div>
-        </div>
-    </div>
-    </div>
-    </div>
     <div class="container">
         <div class="row">
-            <?php
-            include '../listarprodutos.php';
-            ?>
-            <script>
-                function editarProduto(id, nome, descricao, valor) {
-                    abrirModalEditar(id, nome, descricao, valor);
-                }
-
-                // Adiciona evento de clique aos produtos para abrir o modal de edição
-                document.querySelectorAll('.product-row').forEach(item => {
-                    item.addEventListener('click', function() {
-                        document.querySelectorAll('.product-row').forEach(r => r.classList.remove('selected'));
-                        this.classList.add('selected');
-                        const editarBtn = document.getElementById('editarProdutoBtn');
-                        editarBtn.classList.remove('disabled');
-                        editarBtn.classList.add('enabled');
-                        editarBtn.disabled = false;
-
-                        const deleteBtn = document.getElementById('deleteProductBtn');
-                        deleteBtn.classList.remove('disabled');
-                        deleteBtn.classList.add('enabled');
-                        deleteBtn.disabled = false;
-                    });
-
-                    item.addEventListener('dblclick', function() {
-                        const id = this.dataset.id;
-                        const nome = this.dataset.nome;
-                        const descricao = this.dataset.descricao;
-                        const valor = this.dataset.valor;
-                        abrirModalEditar(id, nome, descricao, valor);
-                    });
-                });
-            </script>
-
-            <!-- Pop-up modal -->
-            <div id="modal" class="modal">
-                <div class="modal-content">
-                    <span class="close" onclick="fecharModal()">&times;</span>
-                    <h2>Lista de Produtos</h2>
-
-                    <!-- Aqui será carregada a tabela de produtos via AJAX -->
-                    <div id="conteudo-modal"></div>
-                </div>
-            </div>
+            <?php include '../listarprodutos.php'; ?>
         </div>
     </div>
-    </table>
-    </div>
-    </div>
 </body>
+</html>
