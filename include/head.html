@@ -51,8 +51,37 @@
   <div class="container-fluid">
     <nav class="navbar nav-mod">
     </nav>
+    <div class="container">
+      <div class="row">
+        <div class="col menu-selecionado">
+          
+        </div>
+        <div class="col-6 menu-selecionado">
+          Usuario
+        </div>
+        <div class="col">
+          Menu list
+        </div>
   </div>
 </nav>
+<!-- Adicione isso ao seu arquivo HTML -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      // Seleciona todos os itens do menu
+      const menuItems = document.querySelectorAll('.sidebar ul li a');
+      const menuSelecionadoContainer = document.querySelector('.navbar .menu-selecionado');
+
+      // Adiciona evento de clique a cada item do menu
+      menuItems.forEach(item => {
+          item.addEventListener('click', function (event) {
+              event.preventDefault(); // Evita o redirecionamento imediato
+              const menuText = this.querySelector('.text').textContent; // Obtém o texto do menu
+              const menuIcon = this.querySelector('i').outerHTML; // Obtém o ícone do menu
+              menuSelecionadoContainer.innerHTML = `<h5 style="color: white;">${menuIcon} ${menuText}</h5>`; // Atualiza o conteúdo da div com ícone e texto
+          });
+      });
+  });
+</script>
 <!-- Adicione no head, se ainda não estiver presente -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <!--Barra lateral-->
@@ -70,7 +99,7 @@
       </a>
     </li>
     <li>
-      <a href="/projeto/pages/cadastro_produtos.php">
+      <a href="../projeto/pages/cadastro_produtos.php">
         <i class="fas fa-box"></i>
         <span class="text">Gerenciar produtos</span>
       </a>

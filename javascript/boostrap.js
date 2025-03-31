@@ -164,3 +164,22 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+// atualiza o javascript para recarregar a  Categoria
+
+document.getElementById('iframeModal').addEventListener('hidden.bs.modal', function () {
+    // Recarregar as categorias via AJAX
+    fetch('../include/get_categorias.php')
+        .then(response => response.json())
+        .then(data => {
+            const categoriaSelect = document.getElementById('categoria');
+            categoriaSelect.innerHTML = '<option value="">Selecione uma categoria</option>';
+            data.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria.id;
+                option.textContent = categoria.nome;
+                categoriaSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Erro ao carregar categorias:', error));
+});

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <?php
     include "../include/head.html";
@@ -21,6 +22,21 @@
         error_log("Erro de conexão: " . $e->getMessage());
         die("Erro ao conectar com o banco de dados");
     }
+    // Busca as categorias no banco de dados
+    try {
+        $queryCategorias = "SELECT id, nome FROM categorias ORDER BY nome ASC";
+        $resultCategorias = $conn->query($queryCategorias);
+
+        $categorias = [];
+        if ($resultCategorias && $resultCategorias->num_rows > 0) {
+            while ($row = $resultCategorias->fetch_assoc()) {
+                $categorias[] = $row;
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Erro ao buscar categorias: " . $e->getMessage());
+        $categorias = [];
+    }
     ?>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -34,7 +50,7 @@
             <div class="row">
                 <div class="col-md">
                     <div class="d-flex gap-2 mb-3">
-                        <button type="button" class="btn btn-primary btn-modific d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <button type="button" class="btn btn-primary btn-modific d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalNovoProduto">
                             <img class="img-icon" src="../imagens/icone/adicao.png" alt="">
                             <span class="ms-2">Novo</span>
                         </button>
@@ -50,11 +66,11 @@
     </nav>
 
     <!-- Modal Novo Produto -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal fade" id="modalNovoProduto" tabindex="-1" role="dialog" aria-labelledby="modalNovoProdutoLabel">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Novo Produto</h5>
+                    <h5 class="modal-title" id="modalNovoProdutoLabel">Novo Produto</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="novoProdutoForm" method="POST" novalidate>
@@ -86,55 +102,87 @@
                                         </div>
 
                                         <!-- Modal Categoria -->
-                                        <div class="modal fade" id="categoriaModal" tabindex="-1" aria-labelledby="categoriaModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg">
+
+                                        <!-- Botão para abrir o modal com o iframe -->
+                                        <button type="button" class="btn btn-success mt-2" id="btnNovaCategoria">
+                                            <i class="fas fa-plus"></i> Nova Categoria
+                                        </button>
+                                        <!-- Campo de categoria dentro da pagina de cadastrar produto -->
+                                        <div class="mb-3">
+                                            <label for="categoria" class="form-label">Categoria:</label>
+                                            <select name="categoria_id" id="categoria" class="form-control" required>
+                                                <option value="">Selecione uma categoria</option>
+                                                <?php foreach ($categorias as $categoria): ?>
+                                                    <option value="<?= htmlspecialchars($categoria['id']) ?>">
+                                                        <?= htmlspecialchars($categoria['nome']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <!--Fim campo cadastro-->
+
+                                        <!-- Modal com iframe para carregar a página categoria.php -->
+                                        <div class="modal fade" id="iframeModal" tabindex="-1" aria-labelledby="iframeModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+                                            <div class="modal-dialog modal-xl">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="categoriaModalLabel">Cadastrar Nova Categoria</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        <h5 class="modal-title" id="iframeModalLabel">Gerenciar Categorias</h5>
+                                                        <button type="button" class="btn-close" id="btnCloseIframeModal" aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <iframe src="../pages/categorias.php" frameborder="0" width="100%" height="500px" style="border: none; overflow: hidden;"></iframe>
+                                                        <!-- Iframe para carregar a página categoria.php -->
+                                                        <iframe src="../include/categorias.php" width="100%" height="600px" frameborder="0"></iframe>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" id="btnFecharIframeModal">Fechar</button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <script>
+                                            document.getElementById('iframeModal').addEventListener('hidden.bs.modal', function() {
+                                                // Recarregar a lista de categorias via AJAX
+                                                fetch('../include/get_categorias.php')
+                                                    .then(response => response.json())
+                                                    .then(data => {
+                                                        const categoriaSelect = document.getElementById('categoria');
+                                                        categoriaSelect.innerHTML = '<option value="">Selecione uma categoria</option>'; // Limpa as opções atuais
+                                                        data.forEach(categoria => {
+                                                            const option = document.createElement('option');
+                                                            option.value = categoria.id;
+                                                            option.textContent = categoria.nome;
+                                                            categoriaSelect.appendChild(option);
+                                                        });
+                                                    })
+                                                    .catch(error => console.error('Erro ao carregar categorias:', error));
+                                            });
+                                        </script>
+                                        
+                                        <script>
+                                            document.getElementById('btnNovaCategoria').addEventListener('click', function() {
+                                                // Exibe o modal de categoria sem fechar o modal de cadastro de produto
+                                                const categoriaModal = new bootstrap.Modal(document.getElementById('iframeModal'));
+                                                categoriaModal.show();
+                                            });
 
-                                        <!-- Seção de Categorias -->
-                                        <div class="mb-3">
-                                            <label class="form-label">Categoria do Produto:</label>
-                                            <div class="categorias-container">
-                                                <?php
-                                                try {
-                                                    require_once '../conexao.php';
+                                            document.getElementById('btnCloseIframeModal').addEventListener('click', function() {
+                                                // Fecha apenas o modal de categoria
+                                                const categoriaModal = bootstrap.Modal.getInstance(document.getElementById('iframeModal'));
+                                                categoriaModal.hide();
+                                            });
 
-                                                    if ($conn->connect_error) {
-                                                        throw new Exception("Falha na conexão com o banco de dados");
-                                                    }
+                                            document.getElementById('btnFecharIframeModal').addEventListener('click', function() {
+                                                // Fecha apenas o modal de categoria
+                                                const categoriaModal = bootstrap.Modal.getInstance(document.getElementById('iframeModal'));
+                                                categoriaModal.hide();
+                                            });
 
-                                                    $sql = "SELECT id, nome FROM categorias WHERE status = 1 ORDER BY nome";
-                                                    $result = $conn->query($sql);
-
-                                                    if ($result && $result->num_rows > 0) {
-                                                        echo '<select name="categoria_id" class="form-control mb-2" required>';
-                                                        echo '<option value="">Selecione uma categoria</option>';
-                                                        while ($row = $result->fetch_assoc()) {
-                                                            echo '<option value="' . $row['id'] . '">' . htmlspecialchars($row['nome']) . '</option>';
-                                                        }
-                                                        echo '</select>';
-                                                    } else {
-                                                        echo '<div class="alert alert-warning">Nenhuma categoria encontrada.</div>';
-                                                    }
-                                                } catch (Exception $e) {
-                                                    error_log("Erro ao carregar categorias: " . $e->getMessage());
-                                                    echo '<div class="alert alert-danger">Erro ao carregar categorias. Por favor, tente novamente.</div>';
-                                                }
-                                                ?>
-                                            </div>
-                                            <button type="button" class="btn btn-success mt-2" id="btnNovaCategoria">
-                                                <i class="fas fa-plus"></i> Nova Categoria
-                                            </button>
-                                        </div>
+                                            document.getElementById('iframeModal').addEventListener('hidden.bs.modal', function() {
+                                                // Recarregar a lista de categorias após fechar o modal de categoria
+                                                console.log('Modal de categoria fechado.');
+                                            });
+                                        </script>
                                         <!-- Fim da Seção de Categorias -->
 
                                     </div>
@@ -152,11 +200,11 @@
     </div>
 
     <!-- Modal Editar Produto -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal fade" id="modalEditarProduto" tabindex="-1" aria-labelledby="modalEditarProdutoLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Editar Produto</h5>
+                    <h5 class="modal-title" id="modalEditarProdutoLabel">Editar Produto</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="editProdutoForm" action="../atualizar.php" method="POST">
@@ -242,7 +290,7 @@
                         }
 
                         if (data.success) {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('modalNovoProduto'));
                             modal.hide();
                             alert('Produto cadastrado com sucesso!');
                             location.reload();
@@ -379,8 +427,32 @@
 
             // Adicionando evento para abrir o modal de categoria
             document.getElementById('btnNovaCategoria').addEventListener('click', function() {
-                const categoriaModal = new bootstrap.Modal(document.getElementById('categoriaModal'));
+                const categoriaModal = new bootstrap.Modal(document.getElementById('modalNovaCategoria'));
                 categoriaModal.show();
+            });
+
+            // Tornar o modal de categoria arrastável
+            $('#modalNovaCategoria').on('shown.bs.modal', function() {
+                $('.modal-dialog').draggable({
+                    handle: ".modal-header"
+                });
+            });
+
+            // Evitar que o fechamento do modal de categoria feche o modal de produto
+            $('#modalNovaCategoria').on('hidden.bs.modal', function(e) {
+                e.stopPropagation();
+            });
+
+            // Evitar que o fechamento do modal de categoria feche o modal de produto ao clicar fora do modal
+            $('#modalNovaCategoria').on('hidePrevented.bs.modal', function(e) {
+                e.preventDefault();
+            });
+
+            document.getElementById('btnVoltar').addEventListener('click', function() {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalNovaCategoria'));
+                modal.hide();
+                const produtoModal = new bootstrap.Modal(document.getElementById('modalNovoProduto'));
+                produtoModal.show();
             });
         });
 
@@ -389,7 +461,7 @@
             document.getElementById('editProdutoNome').value = nome;
             document.getElementById('editProdutoDescricao').value = descricao;
             document.getElementById('editProdutoValor').value = valor;
-            const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            const editModal = new bootstrap.Modal(document.getElementById('modalEditarProduto'));
             editModal.show();
         }
     </script>
@@ -400,4 +472,5 @@
         </div>
     </div>
 </body>
+
 </html>

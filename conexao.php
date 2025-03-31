@@ -1,13 +1,26 @@
 <?php
-// Configurações do banco de dados
-$host = "localhost";  // Servidor do banco (normalmente "localhost")
-$dbname = "banco_projeto";  // Nome do banco de dados (substitua pelo nome correto)
-$usuario = "root";  // Usuário do banco de dados
-$senha = "";  // Senha do banco de dados
+$servidor = "localhost";
+$usuario = "root";
+$senha = "";
+$dbname = "banco_projeto";
+
+try {
+    // Conexão com MySQLi
+    $conn = new mysqli($servidor, $usuario, $senha, $dbname);
+
+    if ($conn->connect_error) {
+        throw new Exception("Falha na conexão: " . $conn->connect_error);
+    }
+
+    $conn->set_charset("utf8");
+} catch (Exception $e) {
+    error_log("Erro de conexão: " . $e->getMessage());
+    die("Erro ao conectar com o banco de dados");
+}
 
 try {
     // Criando a conexão com PDO e definindo o banco de dados
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $usuario, $senha);
+    $pdo = new PDO("mysql:host=$servidor;dbname=$dbname;charset=utf8", $usuario, $senha);
 
     // Configurando o PDO para lançar exceções em caso de erro
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
